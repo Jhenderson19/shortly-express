@@ -17,18 +17,17 @@ app.use(express.static(path.join(__dirname, '../public')));
 
 
 
-app.get('/', 
-(req, res) => {
-  res.render('index');
-});
+app.get('/',
+  (req, res) => {
+    res.render('index');
+  });
 
-app.get('/create', 
-(req, res) => {
-  res.render('index');
-});
+app.get('/create',
+  (req, res) => {
+    res.render('index');
+  });
 
-app.get('/links', 
-(req, res, next) => {
+app.get('/links', (req, res, next) => {
   models.Links.getAll()
     .then(links => {
       res.status(200).send(links);
@@ -38,8 +37,7 @@ app.get('/links',
     });
 });
 
-app.post('/links', 
-(req, res, next) => {
+app.post('/links', (req, res, next) => {
   var url = req.body.url;
   if (!models.Links.isValidUrl(url)) {
     // send back a 404 if link is not valid
@@ -77,8 +75,26 @@ app.post('/links',
 /************************************************************/
 // Write your authentication routes here
 /************************************************************/
+app.post('/login', (req, res, next)=>{
+  models.Users.get({username: req.body.username })
+    .then((userObj)=>{
+      if (models.Users.compare(req.body.password, userObj.password, userObj.salt)) {
+        res.status(200).send('password matched');
+      } else {
+        res.status(401).send('password does not match');
+      }
+    });
 
+});
 
+app.post('/signup', (req, res, next)=>{
+  models.Users.create({
+    username: req.body.username,
+    password: req.body.password
+  }).then(()=>{
+    res.status(201).send('username and password created');
+  });
+});
 
 /************************************************************/
 // Handle the code parameter route last - if all other routes fail
