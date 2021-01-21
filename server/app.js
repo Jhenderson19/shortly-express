@@ -6,6 +6,8 @@ const bodyParser = require('body-parser');
 const Auth = require('./middleware/auth');
 const models = require('./models');
 
+const parseCookie = require('./middleware/cookieParser');
+
 const app = express();
 
 app.set('views', `${__dirname}/views`);
@@ -19,6 +21,7 @@ app.use(express.static(path.join(__dirname, '../public')));
 
 app.get('/',
   (req, res) => {
+    parseCookie(req, res);
     res.render('index');
   });
 
@@ -79,6 +82,8 @@ app.post('/login', (req, res, next)=>{
   models.Users.get({username: req.body.username })
     .then((userObj)=>{
       if (models.Users.compare(req.body.password, userObj.password, userObj.salt)) {
+
+
         res.status(200).send('password matched');
       } else {
         res.status(401).send('password does not match');
