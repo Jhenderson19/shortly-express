@@ -21,7 +21,6 @@ app.use(express.static(path.join(__dirname, '../public')));
 
 app.get('/',
   (req, res) => {
-    parseCookie(req, res);
     res.render('index');
   });
 
@@ -81,13 +80,17 @@ app.post('/links', (req, res, next) => {
 app.post('/login', (req, res, next)=>{
   models.Users.get({username: req.body.username })
     .then((userObj)=>{
-      if (models.Users.compare(req.body.password, userObj.password, userObj.salt)) {
 
-
-        res.status(200).send('password matched');
+      if (userObj) {
+        if (models.Users.compare(req.body.password, userObj.password, userObj.salt)) {
+          res.status(200).redirect('/');
+        } else {
+          res.status(401).redirect('/login');
+        }
       } else {
-        res.status(401).send('password does not match');
+        res.redirect('/login');
       }
+
     });
 });
 
@@ -96,7 +99,11 @@ app.post('/signup', (req, res, next)=>{
     username: req.body.username,
     password: req.body.password
   }).then(()=>{
-    res.status(201).send('username and password created');
+    res.status(201).redirect('/');
+  }).catch((err)=>{
+    if (err.errno === 1062) { //username taken
+      res.redirect('/signup');
+    }
   });
 });
 
