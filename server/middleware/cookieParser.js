@@ -15,9 +15,8 @@ const parseCookies = (req, res, next) => {
   }
 
   req.cookies = cookieList;
-  if(next) {
-    next();
-  }
+
+  next ? next() : undefined;
 };
 
 module.exports = parseCookies;

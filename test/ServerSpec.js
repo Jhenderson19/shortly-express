@@ -445,6 +445,7 @@ describe('', function() {
           var userId = results.insertId;
 
           createSession(requestWithoutCookie, response, function() {
+            console.log('withoutcookies');
             var hash = requestWithoutCookie.session.hash;
             db.query('UPDATE sessions SET userId = ? WHERE hash = ?', [userId, hash], function(error, result) {
 
@@ -453,6 +454,7 @@ describe('', function() {
               requestWithCookies.cookies.shortlyid = hash;
 
               createSession(requestWithCookies, secondResponse, function() {
+                console.log('---------hit-------');
                 var session = requestWithCookies.session;
                 expect(session).to.be.an('object');
                 expect(session.user.username).to.eq(username);
