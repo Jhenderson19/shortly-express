@@ -3,11 +3,11 @@ const Promise = require('bluebird');
 const cookieParser = require('./cookieParser');
 
 module.exports.createSession = (req, res, next) => {
-  // console.log( '--------cookie length:::  ' + Object.keys(req.cookies).length );
+  console.log('begin create session');
 
   // creating a new session
   if (Object.keys(req.cookies).length === 0) { // if session dont exist create session by setting req.session and res.cookie()
-
+    console.log('creating new session');
     models.Sessions.create() // our hash to be saved into database
       .then((queryResults) => {
         return models.Sessions.get({id: queryResults.insertId});
@@ -19,15 +19,13 @@ module.exports.createSession = (req, res, next) => {
         next ? next() : undefined;
       });
   } else { // if session exist
+    console.log('looking up previous session');
     req.session = { hash: req.cookies.shortlyid };
     models.Sessions.get({ hash: req.cookies.shortlyid}) // checking to see if there is a session
       .then( (sessionObj) => {
-        console.log('SESSION OBJECT ----------');
-        console.log(sessionObj);
         if (sessionObj) {
           return models.Users.get({ id: sessionObj.userId });
         } else {
-          console.log('I AM AN ERROR AND SHOULDNOT BE SEEN');
           req.headers.cookie = '';
           req.cookies = {};
 

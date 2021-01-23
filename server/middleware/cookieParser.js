@@ -1,5 +1,5 @@
 const parseCookies = (req, res, next) => {
-  // console.log('OUR COOKIE: --------->  ' + req.headers.cookie );
+  console.log('begin cookie parser....');
   var cookieList = {};
   var cookieString = req.headers.cookie;
 

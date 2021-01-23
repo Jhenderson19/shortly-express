@@ -2,7 +2,9 @@ const db = require('../db');
 const _ = require('lodash');
 
 const executeQuery = (query, values) => {
-  return db.queryAsync(query, values).spread(results => results);
+  console.log('executing query');
+  return db.queryAsync(query, values).spread(results => results)
+    .then(console.log('query finished'));
 };
 
 const parseData = options => {
@@ -84,12 +86,6 @@ class Model {
   update(options, values) {
     let parsedOptions = parseData(options);
     let queryString = `UPDATE ${this.tablename} SET ? WHERE ${parsedOptions.string.join(' AND ')}`;
-    console.log('updating sessions table...');
-    console.log(queryString);
-    console.log('values:  ' + JSON.stringify(values));
-    console.log('parsedOptions: ' + JSON.stringify(parsedOptions));
-
-
     // console.log(Array.prototype.concat(values, parsedOptions.values));
     return executeQuery(queryString, Array.prototype.concat(values, parsedOptions.values));
   }

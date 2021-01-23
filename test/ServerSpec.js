@@ -34,7 +34,7 @@ describe('', function() {
   };
 
   beforeEach(function(done) {
-
+    console.log('BEGIN NEW TEST \n\n\n');
     /*************************************************************************************/
     /* TODO: Update user and password if different than on your local machine            */
     /*************************************************************************************/

@@ -81,32 +81,13 @@ app.post('/links', (req, res, next) => {
 // Write your authentication routes here
 /************************************************************/
 app.post('/login', (req, res, next)=>{
+  console.log('received login request');
   models.Users.get({username: req.body.username })
     .then((userObj)=>{
 
       if (userObj) {
         if (models.Users.compare(req.body.password, userObj.password, userObj.salt)) {
-
-          console.log(userObj.id);
-          console.log('session object from request: ');
-          console.log( req.session);
-          models.Sessions.update({hash: req.session.hash}, {hash: req.session.hash, userId: userObj.id})
-            .then((queryResults) => {
-              console.log('RESULTS FROM UPDATE ------------');
-              console.log(queryResults);
-
-              return models.Sessions.get({hash: req.session.hash});
-            }).then((sessionObj) => {
-              console.log('SESSION SHOULD HAVE USER ID: ==========');
-              console.log(JSON.stringify(sessionObj).split(','));
-
-
-              res.status(200).redirect('/');
-            }).catch((err) => {
-              console.log(err);
-            });
-
-
+          res.status(200).redirect('/');
         } else {
           res.status(401).redirect('/login');
         }
@@ -118,11 +99,15 @@ app.post('/login', (req, res, next)=>{
 });
 
 app.post('/signup', (req, res, next)=>{
+  console.log('received signup request');
   models.Users.create({
     username: req.body.username,
     password: req.body.password
-  }).then(()=>{
-
+  }).then((queryResults)=>{
+    return models.Users.get({id: queryResults.insertId});
+  }).then((user) => {
+    return models.Sessions.update({hash: req.session.hash}, {userId: user.id});
+  }).then(() => {
     res.status(201).redirect('/');
     next();
   }).catch((err)=>{
@@ -130,6 +115,14 @@ app.post('/signup', (req, res, next)=>{
       res.redirect('/signup');
     }
   });
+});
+
+app.get('/logout', (req, res, next) => {
+  return models.Sessions.delete({hash: req.session.hash})
+    .then(() => {
+      res.cookie('shortlyid', '');
+      res.status(200).redirect('/');
+    });
 });
 
 /************************************************************/
