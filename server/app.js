@@ -24,22 +24,48 @@ app.use(Auth.createSession);
 
 app.get('/',
   (req, res) => {
-    res.render('index');
+    Auth.verifySession(req, res)
+      .then((result) => {
+        console.log('result of verify session', result);
+        if (result) {
+          res.render('index');
+        } else {
+          res.redirect('/login');
+        }
+      });
   });
 
 app.get('/create',
   (req, res) => {
-    res.render('index');
+    Auth.verifySession(req, res)
+      .then((result) => {
+        console.log('result of verify session', result);
+        if (result) {
+          res.render('index');
+        } else {
+          res.redirect('/login');
+        }
+      });
   });
 
 app.get('/links', (req, res, next) => {
-  models.Links.getAll()
-    .then(links => {
-      res.status(200).send(links);
-    })
-    .error(error => {
-      res.status(500).send(error);
+
+  Auth.verifySession(req, res)
+    .then((result) => {
+      console.log('result of verify session', result);
+      if (result) {
+        models.Links.getAll()
+          .then(links => {
+            res.status(200).send(links);
+          })
+          .error(error => {
+            res.status(500).send(error);
+          });
+      } else {
+        res.redirect('/login');
+      }
     });
+
 });
 
 app.post('/links', (req, res, next) => {
@@ -77,6 +103,14 @@ app.post('/links', (req, res, next) => {
     });
 });
 
+app.get('/login', (req, res) => {
+  res.render('login');
+});
+
+app.get('/signup', (req, res) => {
+  res.render('signup');
+});
+
 /************************************************************/
 // Write your authentication routes here
 /************************************************************/
@@ -87,7 +121,18 @@ app.post('/login', (req, res, next)=>{
 
       if (userObj) {
         if (models.Users.compare(req.body.password, userObj.password, userObj.salt)) {
-          res.status(200).redirect('/');
+
+          models.Sessions.update({hash: req.session.hash}, {hash: req.session.hash, userId: userObj.id})
+            .then((queryResults) => {
+
+              return models.Sessions.get({hash: req.session.hash});
+            }).then((sessionObj) => {
+              res.status(200).redirect('/');
+            }).catch((err) => {
+              console.log(err);
+            });
+
+
         } else {
           res.status(401).redirect('/login');
         }
@@ -99,7 +144,7 @@ app.post('/login', (req, res, next)=>{
 });
 
 app.post('/signup', (req, res, next)=>{
-  console.log('received signup request');
+
   models.Users.create({
     username: req.body.username,
     password: req.body.password
@@ -124,7 +169,6 @@ app.get('/logout', (req, res, next) => {
       res.status(200).redirect('/');
     });
 });
-
 /************************************************************/
 // Handle the code parameter route last - if all other routes fail
 // assume the route is a short code and try and handle it here.

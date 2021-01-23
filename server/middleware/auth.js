@@ -58,3 +58,19 @@ module.exports.createSession = (req, res, next) => {
 /************************************************************/
 // Add additional authentication middleware functions below
 /************************************************************/
+
+module.exports.verifySession = (req, res, next) => {
+
+  return models.Sessions.get({hash: req.session.hash})
+    .then((session) => {
+      // console.log('this is the session-=----:');
+      // console.log(session.userId === null);
+      if (session.userId === null) {
+        throw new Error('error session is invalid');
+      }
+      return true;
+    }).catch((err) => {
+      // console.log(err);
+      return false;
+    });
+};
