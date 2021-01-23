@@ -445,7 +445,6 @@ describe('', function() {
           var userId = results.insertId;
 
           createSession(requestWithoutCookie, response, function() {
-            console.log('withoutcookies');
             var hash = requestWithoutCookie.session.hash;
             db.query('UPDATE sessions SET userId = ? WHERE hash = ?', [userId, hash], function(error, result) {
 
@@ -454,7 +453,6 @@ describe('', function() {
               requestWithCookies.cookies.shortlyid = hash;
 
               createSession(requestWithCookies, secondResponse, function() {
-                console.log('---------hit-------');
                 var session = requestWithCookies.session;
                 expect(session).to.be.an('object');
                 expect(session.user.username).to.eq(username);
@@ -482,7 +480,7 @@ describe('', function() {
     });
   });
 
-  xdescribe('Sessions and cookies', function() {
+  describe('Sessions and cookies', function() {
     var requestWithSession;
     var cookieJar;
 
@@ -533,6 +531,7 @@ describe('', function() {
         if (err) { return done(err); }
         var cookies = cookieJar.getCookies('http://127.0.0.1:4568/');
         var cookieValue = cookies[0].value;
+        // console.log('cookie value:   ' + JSON.stringify(cookieValue));
 
         var queryString = `
           SELECT users.username FROM users, sessions

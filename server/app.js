@@ -86,7 +86,27 @@ app.post('/login', (req, res, next)=>{
 
       if (userObj) {
         if (models.Users.compare(req.body.password, userObj.password, userObj.salt)) {
-          res.status(200).redirect('/');
+
+          console.log(userObj.id);
+          console.log('session object from request: ');
+          console.log( req.session);
+          models.Sessions.update({hash: req.session.hash}, {hash: req.session.hash, userId: userObj.id})
+            .then((queryResults) => {
+              console.log('RESULTS FROM UPDATE ------------');
+              console.log(queryResults);
+
+              return models.Sessions.get({hash: req.session.hash});
+            }).then((sessionObj) => {
+              console.log('SESSION SHOULD HAVE USER ID: ==========');
+              console.log(JSON.stringify(sessionObj).split(','));
+
+
+              res.status(200).redirect('/');
+            }).catch((err) => {
+              console.log(err);
+            });
+
+
         } else {
           res.status(401).redirect('/login');
         }
@@ -102,7 +122,9 @@ app.post('/signup', (req, res, next)=>{
     username: req.body.username,
     password: req.body.password
   }).then(()=>{
+
     res.status(201).redirect('/');
+    next();
   }).catch((err)=>{
     if (err.errno === 1062) { //username taken
       res.redirect('/signup');

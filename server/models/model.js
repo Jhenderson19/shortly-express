@@ -84,6 +84,13 @@ class Model {
   update(options, values) {
     let parsedOptions = parseData(options);
     let queryString = `UPDATE ${this.tablename} SET ? WHERE ${parsedOptions.string.join(' AND ')}`;
+    console.log('updating sessions table...');
+    console.log(queryString);
+    console.log('values:  ' + JSON.stringify(values));
+    console.log('parsedOptions: ' + JSON.stringify(parsedOptions));
+
+
+    // console.log(Array.prototype.concat(values, parsedOptions.values));
     return executeQuery(queryString, Array.prototype.concat(values, parsedOptions.values));
   }
 
